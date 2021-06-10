@@ -94,7 +94,7 @@ ui <- dashboardPage(
     sidebarMenu(
       id = "tabs",
       menuItem("Database and cruise info", tabName = "tab_info", icon = icon("th", lib = "font-awesome")),
-      # menuItem("Krill Length Frequency", tabName = "tab_klf", icon = icon("th", lib = "font-awesome")),
+      menuItem("Krill Length Frequency", tabName = "tab_klf", icon = icon("th", lib = "font-awesome")),
       tags$br(), tags$br(),
       uiOutput("tabs_warning"),
       actionButton("stop", "Close Shiny app")
@@ -121,8 +121,9 @@ ui <- dashboardPage(
     "))),
     
     tabItems(
-      tabItem("tab_info", fluidRow(mod_database_ui("db", db.name.prod, db.name.test)))
-      # tabItem("tab_pt", mod_pinnipeds_tags_ui("pinnipeds_tags"))
+      tabItem("tab_info", fluidRow(mod_database_ui("db", db.name.prod, db.name.test, col.width = 4), 
+                                   mod_cruise_info_ui("cruise", col.width = 8))), 
+      tabItem("tab_klf", fluidRow(h5("todo")))
     )
   )
 )
@@ -163,7 +164,7 @@ server <- function(input, output, session) {
   pool <- mod_database_server(
     "db", db.name.prod, db.name.test, pool.remote.prod, pool.remote.test, db.driver, db.server
   )
-  # si.list <- mod_season_info_server("si", pool)
+  cruise.list <- mod_cruise_info_server("cruise", pool)
   # 
   # mod_afs_diet_server("afs_diet", pool, si.list$season.df, si.list$season.id.list)
   # mod_afs_pinniped_season_server("afs_pinniped_season", pool, si.list$season.df, si.list$season.id.list)

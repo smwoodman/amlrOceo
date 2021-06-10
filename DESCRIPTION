@@ -11,6 +11,7 @@ Imports:
     dbplyr,
     dplyr (>= 1.0),
     pool, 
+    rlang, 
     shiny (>= 1.5), 
     shinybusy,
     shinydashboard, 

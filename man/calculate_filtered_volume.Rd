@@ -30,18 +30,10 @@ Recreates vCalculate_Filtered_Volume
 stuff
 }
 \examples{
-con <- DBI::dbConnect(odbc::odbc(), 
-  Driver = "SQL Server", #"SQL Server Native Client 11.0", 
-  Server = "swc-estrella-s",
-  Database = "AMLR_OCEO",
-  Trusted_Connection = "True")
-
-stopifnot(require(dplyr))
-net                 <- tbl(con, "NET") \%>\% collect()
-net.station.header  <- tbl(con, "NET_STATION_HEADER") \%>\% collect()
-amlr.station.header <- tbl(con, "AMLR_STATION_HEADER") \%>\% collect()
-tucker.header.data  <- tbl(con, "TUCKER_HEADER_DATA") \%>\% collect()
-
-calculate_filtered_volume(net, net.station.header, amlr.station.header, tucker.header.data)
+\dontrun{
+  calculate_filtered_volume(
+    net, net.station.header, amlr.station.header, tucker.header.data
+  )
+}
 
 }
