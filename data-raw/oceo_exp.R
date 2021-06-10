@@ -32,7 +32,7 @@ net.zoo <- tbl(con, "NET_ZOOPLANKTON_DATA") %>% collect()
 krill.maturity.length <- tbl(con, "KRILL_MATURITY_LENGTH") %>% collect()
 elmd <- tbl(con, "EUPHAUSIID_LENGTH_MATURITY_DATA") %>% collect()
 
-x1 <- tbl(con, "vCalculate_VOLUME_FILTERED") %>% collect() %>% 
+v.cvf <- tbl(con, "vCalculate_VOLUME_FILTERED") %>% collect() %>% 
   arrange(net_id)
 
 
@@ -154,28 +154,30 @@ net.tucker <- net %>% filter(net_type == "T")
 
 ###############################################################################
 # Compare vCalculate_Volume_Filtered to output of amlrOceo::calculate_volume_filtered()
+library(amlrOceo)
+net.proc <- amlrOceo::calculate_filtered_volume(net, net.station, amlr.station, tucker)
 
-waldo::compare(x1$net_id, net.proc$net_id)
-waldo::compare(x1$AMLR_Cruise, net.proc$amlr_cruise)
-waldo::compare(x1$Volume,net.proc$volume, tolerance = 10)
-waldo::compare(x1$NZ_vol, if_else(net.proc$volume_isnull, "Y", "N"))
-waldo::compare(x1$depth_fished, net.proc$depth_fished, tolerance = 10)
-waldo::compare(x1$NZ_depth, if_else(net.proc$depth_fished_isnull, "Y", "N"))
-
-
-d.diff <- x1 %>% filter(round(x1$Volume, 2) != round(net.proc$volume, 2))
-d.diff <- x1 %>% filter(NZ_vol != if_else(net.proc$volume_isnull, "Y", "N"))
+# waldo::compare(v.cvf$net_id, net.proc$net_id)
+# waldo::compare(v.cvf$AMLR_Cruise, net.proc$amlr_cruise)
+# waldo::compare(v.cvf$Volume,net.proc$volume, tolerance = 10)
+# waldo::compare(v.cvf$NZ_vol, if_else(net.proc$volume_isnull, "Y", "N"))
+# waldo::compare(v.cvf$depth_fished, net.proc$depth_fished, tolerance = 10)
+# waldo::compare(v.cvf$NZ_depth, if_else(net.proc$depth_fished_isnull, "Y", "N"))
+# 
+# 
+# d.diff <- v.cvf %>% filter(round(v.cvf$Volume, 2) != round(net.proc$volume, 2))
+# d.diff <- v.cvf %>% filter(NZ_vol != if_else(net.proc$volume_isnull, "Y", "N"))
 
 # Wowww so cool
-x2 <- x1 %>% 
+v.cvf.tocompare <- v.cvf %>% 
   select(net_id, net_station_header_id, amlr_cruise = AMLR_Cruise, amlr_station = AMLR_Station, 
          amlr_station_header_id = AMLR_Station_Header_ID,
          net_type, net, volume = Volume, volume_isnull = NZ_vol, 
          depth_fished, depth_fished_isnull = NZ_depth)
 
 waldo::compare(
-  x2, 
-  amlrOceo::calculate_filtered_volume(net, net.station, amlr.station, tucker) %>% 
+  v.cvf.tocompare, 
+  net.proc %>% 
     mutate(volume_isnull = if_else(volume_isnull, "Y", "N"), 
            depth_fished_isnull = if_else(depth_fished_isnull, "Y", "N")), 
   tolerance = 10
