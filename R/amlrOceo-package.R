@@ -10,6 +10,7 @@
 #' @title AMLR Krill and Oceanographic Program data processing and analysis
 #' @author Sam Woodman \email{sam.woodman@@noaa.gov}
 #'
+#' @import amlrDatabases
 #' @import dplyr
 #'
 #' @importFrom rlang .data 

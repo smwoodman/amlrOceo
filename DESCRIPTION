@@ -6,12 +6,18 @@ Authors@R:
 Description: What the package does (one paragraph).
 Depends: R (>= 3.5.0)
 Imports: 
+    amlrDatabases, 
     DBI, 
     dbplyr,
     dplyr (>= 1.0),
-    odbc,
     pool, 
+    shiny (>= 1.5), 
+    shinybusy,
+    shinydashboard, 
+    shinyjs, 
     tidyr
+Remotes:
+    us-amlr/amlrDatabases
 License: CC0
 Encoding: UTF-8
 LazyData: true
