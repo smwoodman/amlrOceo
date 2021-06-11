@@ -14,8 +14,9 @@ mod_cruise_info_ui <- function(id, col.width = 7) {
   # assemble UI elements
   tagList(
     box(
-      title = "Cruise information", status = "warning", solidHeader = FALSE, width = col.width, collapsible = TRUE,
-      tableOutput(ns("tbl_info")),
+      title = "Cruise information", status = "warning", width = col.width, collapsible = TRUE,
+      DTOutput(ns("tbl_info")),
+      tags$br(), 
       downloadButton(ns("tbl_download"), "Download table as CSV")
     )
   )
@@ -24,13 +25,12 @@ mod_cruise_info_ui <- function(id, col.width = 7) {
 
 #' @name mod_cruise_info
 #'
-#' @param pool reactive; a DBI database connection pool, intended to be the output of \code{\link{mod_database_server}}
+#' @param pool reactive; a DBI database connection pool
+#' Intended to be the output of \code{\link[amlrDatabases]{mod_database_server}}
 #'
-#' @returns
-#' \code{mod_season_server} returns a list of ...:
-#' 1) \code{season.df}, the season information data frame and
-#' 2) \code{season.id.list}, a list of the ID values from the season information table,
-#' with the 'season_name' values as names
+#' @returns 
+#' A data frame with the contents of the AMLR_STATION_HEADER table, 
+#' with some columns renamed
 #'
 #' @export
 mod_cruise_info_server <- function(id, pool) {
@@ -42,19 +42,41 @@ mod_cruise_info_server <- function(id, pool) {
       pasouq <- function(x) paste(sort(unique(x)), collapse = ", ")
       
       # Get data from table
-      cruise_info <- reactive({
-        tbl(req(pool()), "AMLR_STATION_HEADER") %>% 
+      amlr_station_header <- reactive({
+        x <- tbl(req(pool()), "AMLR_STATION_HEADER") %>% 
           collect() %>% 
-          group_by(`AMLR Cruise` = .data$amlr_cruise) %>% 
-          summarise(`Ship(s)` = pasouq(.data$Ship), 
-                    `Area(s)` = pasouq(.data$amlr_area), 
+          # mutate(tmp = paste(amlr_cruise, Station, sep = "_"))
+          # waldo::compare(x$amlr_station, y$tmp) #ok
+          rename(amlr_station_header_id = ID, cruise_station = amlr_station, 
+                 cruise = amlr_cruise, station = Station, ship = Ship, 
+                 area = amlr_area)
+        
+        x.names <- c(
+          "amlr_station_header_id", "cruise_station", "cruise", "station", 
+          "leg", "ship", "area", "bottom_depth", 
+          "created_dt", "ice_status", "restrictedUse", "gssmu"
+        )
+        validate(
+          need(identical(names(x), x.names), 
+               "amlr_station_header names have changed - please contact Sam")
+        )
+        
+        x
+      })
+      
+      # Summarize for display table
+      cruise_info <- reactive({
+        amlr_station_header() %>% 
+          group_by(Cruise = .data$cruise) %>% 
+          summarise(`Ship(s)` = pasouq(.data$ship), 
+                    `Area(s)` = pasouq(.data$area), 
                     `Leg(s)` = pasouq(.data$leg), 
                     `GSSMU(s)` = pasouq(.data$gssmu), 
-                    `Number of stations` = length(.data$Station))
+                    `Number of stations` = length(.data$station))
       })
       
       # Season info display table
-      output$tbl_info <- renderTable(cruise_info())
+      output$tbl_info <- renderDT(cruise_info(), options = list(scrollX = TRUE))
       
       # Download table
       output$tbl_download <- downloadHandler(
@@ -66,18 +88,8 @@ mod_cruise_info_server <- function(id, pool) {
         }
       )
       
-      ### Return values
-      list()
-      # list(
-      #   season.df = season_info,
-      #   season.id.list = reactive(set_names(as.list(season_info()$ID), season_info()$season_name))
-      # )
+      ### Return reactive for amlr station header data frame
+      return(amlr_station_header)
     }
   )
 }
-
-
-##############################################################################
-
-
-##############################################################################

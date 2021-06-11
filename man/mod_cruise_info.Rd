@@ -15,15 +15,12 @@ mod_cruise_info_server(id, pool)
 
 \item{col.width}{integer; column width of column of UI widgets}
 
-\item{pool}{reactive; a DBI database connection pool, intended to be the output of \code{\link{mod_database_server}}}
+\item{pool}{reactive; a DBI database connection pool
+Intended to be the output of \code{\link[amlrDatabases]{mod_database_server}}}
 }
 \value{
-\code{mod_season_server} returns a list of ...:
-\enumerate{
-\item \code{season.df}, the season information data frame and
-\item \code{season.id.list}, a list of the ID values from the season information table,
-with the 'season_name' values as names
-}
+A data frame with the contents of the AMLR_STATION_HEADER table,
+with some columns renamed
 }
 \description{
 Shiny module for OCEO cruise information
