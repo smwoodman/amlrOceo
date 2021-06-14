@@ -8,7 +8,7 @@
 \usage{
 mod_krill_length_frequency_ui(id)
 
-mod_krill_length_frequency_server(id, pool, amlr.station.header)
+mod_krill_length_frequency_server(id, pool, headers.list, net)
 }
 \arguments{
 \item{id}{character used to specify namespace, see \code{shiny::\link[shiny]{NS}}}
@@ -16,7 +16,10 @@ mod_krill_length_frequency_server(id, pool, amlr.station.header)
 \item{pool}{reactive; a DBI database connection pool.
 Intended to be the output of \code{\link[amlrDatabases]{mod_database_server}}}
 
-\item{amlr.station.header}{reactive; the output of \code{\link{mod_cruise_info_server}}}
+\item{headers.list}{list of reactive data frames from OCEO header tables;
+the output of \code{\link{mod_headers_server}}}
+
+\item{net}{reactive data frame of the NET table from AMLR_OCEO}
 }
 \description{
 Modules for the different tabs of the amlrOceo Shiny app

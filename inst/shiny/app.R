@@ -5,7 +5,7 @@
 list.packages <- list(
   "amlrDatabases", "DBI", "pool",
   "DT", "shiny", "shinybusy", "shinydashboard", "shinyjs",
-  "dplyr", "tidyr"
+  "dplyr", "lubridate", "tidyr"
 )
 
 if (!require(amlrOceo))
@@ -93,8 +93,8 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = "tabs",
-      menuItem("Database and cruise info", tabName = "tab_info", icon = icon("th", lib = "font-awesome")),
-      menuItem("Krill Length Frequency", tabName = "tab_krill_lf", icon = icon("th", lib = "font-awesome")),
+      menuItem("Database and cruise info", tabName = "tab_db_headers", icon = icon("th", lib = "font-awesome")),
+      menuItem("Krill length frequency", tabName = "tab_krill_lf", icon = icon("th", lib = "font-awesome")),
       tags$br(), tags$br(),
       uiOutput("tabs_warning"),
       actionButton("stop", "Close Shiny app")
@@ -121,9 +121,9 @@ ui <- dashboardPage(
     "))),
     
     tabItems(
-      tabItem("tab_info", fluidRow(
+      tabItem("tab_db_headers", fluidRow(
         mod_database_ui("db", db.name.prod, db.name.test, col.width = 4), 
-        mod_cruise_info_ui("cruise", col.width = 8)
+        mod_headers_ui("headers", col.width = 8)
       )), 
       tabItem("tab_krill_lf", mod_krill_length_frequency_ui("krill_lf"))
     )
@@ -162,13 +162,22 @@ server <- function(input, output, session) {
   
   
   #----------------------------------------------------------------------------
+  ### One-time data gets
+  net <- reactive({
+    tbl(req(pool()), "NET") %>% 
+      collect() %>% 
+      rename(net_id = NET_ID)
+  })
+  
+  
+  #----------------------------------------------------------------------------
   ### Modules
   pool <- mod_database_server(
     "db", db.name.prod, db.name.test, pool.remote.prod, pool.remote.test, db.driver, db.server
   )
-  amlr.station.header <- mod_cruise_info_server("cruise", pool)
+  headers.list <- mod_headers_server("headers", pool)
   
-  mod_krill_length_frequency_server("krill_lf", pool, amlr.station.header)
+  mod_krill_length_frequency_server("krill_lf", pool, headers.list, net)
 }
 
 shiny::shinyApp(ui = ui, server = server)

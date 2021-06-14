@@ -10,6 +10,7 @@ Imports:
     DBI, 
     dbplyr,
     dplyr (>= 1.0),
+    lubridate, 
     pool, 
     rlang, 
     shiny (>= 1.5), 
